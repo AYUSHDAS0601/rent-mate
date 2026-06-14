@@ -206,17 +206,19 @@ function LandingPage() {
           </Link>
 
           <nav className="hidden items-center gap-7 md:flex">
-            <button onClick={() => scrollToSection('how')}>
-               How it works
-            </button>
-            <button onClick={() => scrollToSection('trust')}>
-               Trust & Safety
-            </button>
-            <button onClick={() => scrollToSection('download')}>
-              Mobile app
-            </button>
-          </nav>
-
+        <button onClick={() => scrollToSection('how')}>
+          How it works
+        </button>
+        <button onClick={() => scrollToSection('trust')}>
+          Trust & Safety
+        </button>
+        <button onClick={() => scrollToSection('download')}>
+          Mobile app
+        </button>
+        <button onClick={() => scrollToSection('faq')}>
+          FAQ
+        </button>
+      </nav>
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
     <div className="relative">
@@ -411,7 +413,29 @@ function LandingPage() {
           </div>
         </div>
       </section>
-    </main>
+    
+    {/* FAQ Section */}
+      <section id="faq" className="relative mt-20 max-w-6xl mx-auto px-4 py-10">
+        <div className="gradient-border overflow-hidden rounded-3xl bg-slate-900/40 p-8 md:p-12">
+          <div className="inline-block rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+            FAQ
+          </div>
+          <h2 className="mt-4 text-3xl font-black tracking-tight text-white md:text-4xl">
+            Frequently Asked Questions
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-slate-400">
+            Have questions about renting or listing items? Find quick answers here.
+          </p>
+          
+          <div className="mt-10 space-y-4">
+            {/* Open Source Contributors: Add FAQ accordion items here */}
+            <div className="rounded-xl border border-white/[0.08] bg-slate-900/20 p-6 text-slate-500 text-sm text-center border-dashed">
+              Contributor placeholder: Interactive FAQ accordion layout will go here.
+            </div>
+          </div>
+        </div>
+      </section>
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-white/[0.04]">
