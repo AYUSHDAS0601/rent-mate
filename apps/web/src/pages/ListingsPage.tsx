@@ -81,10 +81,10 @@ export default function ListingsPage() {
               <div key={item.id} className="bg-slate-900 rounded-xl p-5 flex flex-col gap-3 hover:ring-1 hover:ring-blue-600 transition">
                 {/* Placeholder image */}
                 <div className="w-full h-36 bg-slate-800 rounded-lg flex items-center justify-center text-4xl">
-                  {item.category === "Electronics" ? "??" :
-                   item.category === "Sports" ? "??" :
-                   item.category === "Outdoor" ? "?" :
-                   item.category === "Tools" ? "??" : "??"}
+                  {item.category === "Electronics" ? "💻" : 
+                   item.category === "Sports" ? "⚽" : 
+                   item.category === "Outdoor" ? "⛺" : 
+                   item.category === "Tools" ? "🔧" : "📦"}
                 </div>
 
                 <div className="flex items-start justify-between">
@@ -98,7 +98,7 @@ export default function ListingsPage() {
                 </div>
 
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="text-blue-400 font-bold">?{item.price}<span className="text-slate-500 font-normal text-sm">/day</span></span>
+                  <span className="text-blue-400 font-bold">₹{item.price}<span className="text-slate-500 font-normal text-sm">/day</span></span>
                   <button
                     disabled={!item.available}
                     className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${
