@@ -1,122 +1,73 @@
-import Lottie from 'lottie-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Routes, Route, Link } from 'react-router-dom'
 import AuthPage from './pages/AuthPage'
 import ListingsPage from './pages/ListingsPage'
 import NewListingPage from './pages/NewListingPage'
-import type { ReactNode } from 'react'
+import Navbar from './components/Navbar'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
-
+// ─── Data ─────────────────────────────────────────────────────────────────────
 const MARQUEE_ITEMS = [
-  '📷 DSLR Camera', '🛺 Camping Gear', '🎮 Gaming Console', '🔧 Power Tools',
-  '🎸 Guitar', '🚲 Bicycle', '📽️ Projector', '🏕️ Tent', '🎤 Mic Setup',
-  '🛵 Scooter', '🎨 Art Supplies', '💻 MacBook',
+  'DSLR Camera', 'Camping Gear', 'Gaming Console', 'Power Tools',
+  'Acoustic Guitar', 'Bicycle', 'Projector', 'Camping Tent', 'Mic Setup',
+  'Scooter', 'Art Supplies', 'MacBook Pro', 'DJ Setup', 'Drone', 'Kayak',
 ]
 
 const HOW_IT_WORKS = [
-  {
-    step: '01',
-    icon: '🗺️',
-    title: 'Discover nearby',
-    body: 'Browse verified listings by category, price range, and distance from you.',
-    color: 'from-violet-500/20 to-violet-500/5',
-    accent: 'border-violet-500/40',
-  },
-  {
-    step: '02',
-    icon: '🔐',
-    title: 'Book with confidence',
-    body: 'KYC-verified owners, transparent deposits, and a 72h inspection window.',
-    color: 'from-sky-500/20 to-sky-500/5',
-    accent: 'border-sky-500/40',
-  },
-  {
-    step: '03',
-    icon: '🤝',
-    title: 'Handoff → return',
-    body: 'Guided pickup and return flow. Disputes resolved in your favour, every time.',
-    color: 'from-emerald-500/20 to-emerald-500/5',
-    accent: 'border-emerald-500/40',
-  },
+  { step: '01', icon: '🗺️', title: 'Discover Nearby', body: 'Browse verified listings by category, price range, and distance from you.' },
+  { step: '02', icon: '🔐', title: 'Book with Confidence', body: 'KYC-verified owners, transparent deposits, and a 72h inspection window.' },
+  { step: '03', icon: '🤝', title: 'Handoff & Return', body: 'Guided pickup and return flow. Disputes resolved in your favour, every time.' },
 ]
 
 const TRUST_ITEMS = [
-  { icon: '🛡️', label: 'OTP auth & JWT sessions', desc: 'Passwordless, secure, instant' },
-  { icon: '🪪', label: 'KYC verification', desc: 'Aadhaar / PAN identity checks' },
-  { icon: '💰', label: 'Escrow deposits', desc: 'Funds held until safe return' },
-  { icon: '⚖️', label: 'Dispute resolution', desc: 'Admin-mediated, fair outcomes' },
+  { icon: '🛡️', label: 'OTP Auth & JWT', desc: 'Passwordless, secure, instant' },
+  { icon: '🪪', label: 'KYC Verification', desc: 'Aadhaar / PAN identity checks' },
+  { icon: '💰', label: 'Escrow Deposits', desc: 'Funds held until safe return' },
+  { icon: '⚖️', label: 'Dispute Resolution', desc: 'Admin-mediated, fair outcomes' },
 ]
 
-const FLOATING_TAGS = [
-  { label: '₹499/day', top: '6%', left: '-2%', delay: '0s' },
-  { label: '⭐ 4.9', top: '18%', right: '-4%', delay: '1.5s' },
-  { label: '✓ Verified', bottom: '32%', left: '-4%', delay: '0.8s' },
-  { label: '📍 2.3 km', bottom: '8%', right: '-2%', delay: '2s' },
+const STATS = [
+  { val: '500+', label: 'Active Listings' },
+  { val: '4.9★', label: 'Avg Rating' },
+  { val: '72h', label: 'Dispute SLA' },
+  { val: '100%', label: 'Escrow Protected' },
 ]
 
-function Button({
-  children,
-  variant = 'primary',
-  href,
-  size = 'md',
-}: {
-  children: ReactNode
-  variant?: 'primary' | 'secondary' | 'ghost'
-  href?: string
-  size?: 'sm' | 'md' | 'lg'
-}) {
-  const sizes = { sm: 'px-3 py-1.5 text-xs', md: 'px-5 py-2.5 text-sm', lg: 'px-7 py-3.5 text-base' }
-  const base = `inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-400/60 focus:ring-offset-2 focus:ring-offset-slate-950 ${sizes[size]}`
-  const styles = {
-    primary: 'bg-violet-600 text-white hover:bg-violet-500 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 active:translate-y-0',
-    secondary: 'bg-white/8 text-white border border-white/10 hover:bg-white/12 hover:border-white/20 hover:-translate-y-0.5',
-    ghost: 'text-slate-300 hover:text-white',
-  }[variant]
+const FAQS = [
+  { q: 'How does the security deposit work?', a: 'The deposit is held in escrow when the rental begins. It is returned to the renter after the owner confirms the item is back in good condition.' },
+  { q: 'What happens if an item is damaged?', a: 'Our 72-hour inspection window allows both parties to flag damage. Admins mediate disputes fairly using photographic evidence.' },
+  { q: 'Is KYC mandatory to list an item?', a: 'Yes. KYC (Aadhaar/PAN + selfie verification) is required to list items. This builds trust and prevents fraudulent listings.' },
+  { q: 'What categories are available?', a: 'Electronics, Photography, Sports, Outdoor, Tools, Music, Gaming, Furniture, Vehicles, and more — with new categories added regularly.' },
+]
 
-if (href?.startsWith('/')) {
+// ─── FAQ Accordion ─────────────────────────────────────────────────────────────
+function FAQ({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false)
   return (
-    <Link to={href} className={`${base} ${styles}`}>
-      {children}
-    </Link>
-  )
-}
-
-if (href?.startsWith('#')) {
-  return (
-    <a href={href} className={`${base} ${styles}`}>
-      {children}
-    </a>
-  )
-}
-
-return <button className={`${base} ${styles}`}>{children}</button>
-}
-
-function FloatingTag({
-  label, top, left, right, bottom, delay,
-}: {
-  label: string; top?: string; left?: string; right?: string; bottom?: string; delay: string
-}) {
-  return (
-    <div
-      className="absolute animate-float rounded-full border border-white/10 bg-slate-900/80 px-3 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-sm"
-      style={{ top, left, right, bottom, animationDelay: delay }}
-    >
-      {label}
+    <div style={{ borderBottom: '1px solid var(--border-light)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '16px' }}
+      >
+        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--fg)', letterSpacing: '-0.01em' }}>{q}</span>
+        <span style={{ fontSize: '1.2rem', color: 'var(--fg-muted)', flexShrink: 0, transition: 'transform 0.2s', transform: open ? 'rotate(45deg)' : 'none', display: 'block', lineHeight: 1 }}>+</span>
+      </button>
+      {open && (
+        <p style={{ paddingBottom: '20px', fontSize: '0.85rem', color: 'var(--fg-muted)', lineHeight: 1.7, marginTop: 0 }}>{a}</p>
+      )}
     </div>
   )
 }
 
+// ─── Marquee Strip ─────────────────────────────────────────────────────────────
 function MarqueeStrip() {
   const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
   return (
-    <div className="relative overflow-hidden border-y border-white/[0.06] py-3">
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-slate-950" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-slate-950" />
-      <div className="flex animate-marquee whitespace-nowrap">
+    <div style={{ overflow: 'hidden', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)', padding: '14px 0', position: 'relative', background: 'var(--bg-white)' }}>
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '60px', background: 'linear-gradient(to right, var(--bg-white), transparent)', zIndex: 1 }} />
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '60px', background: 'linear-gradient(to left, var(--bg-white), transparent)', zIndex: 1 }} />
+      <div className="announce-strip" style={{ display: 'flex', whiteSpace: 'nowrap' }}>
         {items.map((item, i) => (
-          <span key={i} className="mx-6 text-sm font-medium text-slate-400">
+          <span key={i} style={{ marginRight: '48px', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-muted)' }}>
             {item}
           </span>
         ))}
@@ -125,335 +76,237 @@ function MarqueeStrip() {
   )
 }
 
-// Reliable LottieFiles CDN animation — delivery/handoff themed
-const LOTTIE_SRC = 'https://lottie.host/0e4c43bf-b88a-4fd5-95e7-b855efedd3a4/Pj1BBjWxLq.json'
-
-function LottieHero() {
-  const [prefersReduced, setPrefersReduced] = useState(false)
-
-  const [animData, setAnimData] = useState<object | null>(null)
-
-  useEffect(() => {
-    setPrefersReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-    const t = setTimeout(() => {
-      fetch(LOTTIE_SRC)
-        .then((r) => r.json())
-        .then((data) => setAnimData(data))
-        .catch(() => null)
-    }, 100)
-    return () => clearTimeout(t)
-  }, [])
-
-  return (
-    <div className="relative flex items-center justify-center animate-fadeInUp overflow-visible">
-      {FLOATING_TAGS.map((tag) => (
-        <FloatingTag key={tag.label} {...tag} />
-      ))}
-      <div className="gradient-border relative overflow-visible rounded-3xl bg-slate-900/60 shadow-2xl shadow-violet-500/10 backdrop-blur-sm p-6">
-        {animData && !prefersReduced ? (
-          <Lottie
-            animationData={animData}
-            loop
-            autoplay
-            style={{ height: 360, width: 360 }}
-          />
-        ) : (
-          // fallback for reduced-motion or before load
-          <div className="flex h-[360px] w-[360px] flex-col items-center justify-center gap-6">
-            <div className="text-8xl">🤝</div>
-            <div className="text-center text-sm text-slate-400">
-              Peer-to-peer rentals<br />KYC verified · Escrow protected
-            </div>
-          </div>
-        )}
-        <p className="text-center text-xs text-slate-500 mt-2 tracking-widest uppercase">
-          Peer-to-peer rentals · KYC verified
-        </p>
-      </div>
-    </div>
-  )
-}
-
+// ─── Landing Page ──────────────────────────────────────────────────────────────
 function LandingPage() {
-  const isLoggedIn = !!localStorage.getItem("token");
-  const [showMenu, setShowMenu] = useState(false);
-  const scrollToSection = (id: string) => {
-  const el = document.getElementById(id)
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' })
-  }
-}
   return (
-    <div className="min-h-screen bg-slate-950">
-      {/* Background */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_0%,rgba(124,92,255,0.18),transparent_55%),radial-gradient(ellipse_at_80%_10%,rgba(56,189,248,0.12),transparent_50%),radial-gradient(ellipse_at_50%_100%,rgba(16,185,129,0.1),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_60%,rgb(2,6,23))]" />
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '64px 64px' }} />
-      </div>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      <Navbar />
 
-      {/* Navbar */}
-      <header className="glass sticky top-0 z-50 border-b border-white/[0.06]">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-violet-600 text-sm font-black text-white shadow-lg shadow-violet-500/40">
-              RM
-            </div>
-            <div className="leading-tight">
-              <div className="text-sm font-bold text-white">Rent Mate</div>
-              <div className="text-[10px] text-slate-500">Hyperlocal rentals</div>
-            </div>
-          </Link>
+      {/* ── HERO ─────────────────────────────────────────────────────────── */}
+      <section style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border-light)' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '520px', alignItems: 'stretch' }}>
 
-          <nav className="hidden items-center gap-7 md:flex">
-        <button onClick={() => scrollToSection('how')}>
-          How it works
-        </button>
-        <button onClick={() => scrollToSection('trust')}>
-          Trust & Safety
-        </button>
-        <button onClick={() => scrollToSection('download')}>
-          Mobile app
-        </button>
-        <button onClick={() => scrollToSection('faq')}>
-          FAQ
-        </button>
-      </nav>
-        <div className="flex items-center gap-2">
-          {isLoggedIn ? (
-    <div className="relative">
-      <button
-        onClick={() => setShowMenu(!showMenu)}
-        className="text-green-400 text-sm font-medium"
-      >
-        Logged In ✓
-      </button>
-
-      {showMenu && (
-        <div className="absolute right-0 mt-2 w-32 rounded-lg bg-slate-900 border border-slate-700 shadow-lg">
-          <button
-            onClick={() => {
-              localStorage.removeItem("token");
-              window.location.reload();
-            }}
-            className="w-full text-left px-4 py-2 text-red-400 hover:bg-slate-800"
-          >
-            Logout
-          </button>
-        </div>
-      )}
-    </div>
-  ) : (
-            <Link to="/auth">
-              <Button variant="ghost" size="md">
-                  Sign in
-              </Button>
-            </Link>
-            )}
-            <Link to="/listings/new">
-              <Button size="sm">
-                List an item ↗
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-6xl px-6 pb-24">
-
-        {/* Hero */}
-        <section className="relative flex flex-col gap-12 py-16 md:py-24">
-          {/* Left */}
-          <div className="animate-fadeInUp">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-300">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-              </span>
-              Now live · API at {API_BASE}
-            </div>
-
-            <h1 className="text-balance text-5xl font-black tracking-tighter text-white md:text-7xl">
-              Rent what{' '}
-              <span className="shimmer-text">you need.</span>
-              <br />
-              Earn from{' '}
-              <span className="shimmer-text">what you own.</span>
-            </h1>
-
-            <p className="animate-fadeInUp-delayed mt-6 max-w-lg text-pretty text-base leading-relaxed text-slate-400 md:text-lg">
-              India's peer-to-peer rental marketplace — built for college campuses and urban communities. KYC verified. Escrow protected. Real-time.
-            </p>
-
-            <div className="animate-fadeInUp-delayed-2 mt-8 flex flex-wrap items-center gap-3">
-              <Link to="/listings">
-                <Button size="lg">
-                  Browse listings →
-                </Button>
-              </Link>
-              <Button variant="secondary" href="#how" size="lg">How it works</Button>
-            </div>
-
-            <div className="mt-10 flex items-center gap-6 text-sm text-slate-400">
-              {([
-                  ['500+', 'Listings'],
-                  ['4.9★', 'Avg rating'],
-                  ['72h', 'Dispute SLA'],
-                ] as const).map(([val, lbl]) => (
-                <div key={lbl}>
-                  <span className="block text-xl font-black text-white">{val}</span>
-                  <span className="text-xs">{lbl}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right — Lottie Hero Animation */}
-          <div className="animate-fadeInUp"></div>
-          <LottieHero />
-        </section>
-
-        {/* Marquee */}
-        <MarqueeStrip />
-
-        {/* How it works */}
-        <section id="how" className="mt-20">
-          <div className="mb-10 text-center">
-            <div className="inline-block rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-violet-400">
-              How it works
-            </div>
-            <h2 className="mt-4 text-3xl font-black tracking-tight text-white md:text-4xl">
-              Three steps to your next rental
-            </h2>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {HOW_IT_WORKS.map((c) => (
-              <div
-                key={c.step}
-                className={`card-hover gradient-border relative overflow-hidden rounded-3xl border bg-gradient-to-br ${c.color} to-transparent p-7`}
-              >
-                <div className="absolute right-5 top-5 font-black text-6xl text-white/[0.04]">{c.step}</div>
-                <div className="mb-4 text-4xl">{c.icon}</div>
-                <div className={`mb-1 inline-block rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${c.accent} text-slate-400`}>
-                  Step {c.step}
-                </div>
-                <div className="mt-2 text-lg font-bold text-white">{c.title}</div>
-                <div className="mt-2 text-sm leading-relaxed text-slate-400">{c.body}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Trust & Safety */}
-        <section id="trust" className="mt-20">
-          <div className="gradient-border overflow-hidden rounded-3xl bg-slate-900/40 p-8 md:p-12">
-            <div className="grid gap-10 md:grid-cols-2">
-              <div>
-                <div className="inline-block rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-400">
-                  Trust & Safety
-                </div>
-                <h2 className="mt-4 text-3xl font-black tracking-tight text-white md:text-4xl">
-                  Built safe,<br />from the ground up.
-                </h2>
-                <p className="mt-4 text-base leading-relaxed text-slate-400">
-                  Every transaction is wrapped in identity checks, escrow payments, and dispute resolution — so you can rent and lend with zero anxiety.
-                </p>
-                <Button variant="secondary" href="#download" size="lg">
-                  See full safety guide →
-                </Button>
+            {/* Left */}
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px 48px 60px 0', borderRight: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--accent)', padding: '4px 12px', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg)', marginBottom: '24px', width: 'fit-content' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--fg)', display: 'inline-block' }} />
+                Now Live in India
               </div>
 
-              <div className="grid gap-3">
-                {TRUST_ITEMS.map((t) => (
-                  <div
-                    key={t.label}
-                    className="card-hover flex items-center gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4"
-                  >
-                    <div className="grid h-11 w-11 flex-shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/5 text-2xl">
-                      {t.icon}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-white">{t.label}</div>
-                      <div className="text-xs text-slate-500">{t.desc}</div>
-                    </div>
-                    <div className="ml-auto text-slate-600">›</div>
+              <h1 style={{ fontSize: 'clamp(2.8rem, 5vw, 4.2rem)', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--fg)', lineHeight: 1.0, margin: '0 0 20px', textTransform: 'uppercase' }}>
+                Rent What<br />You Need.<br />
+                <span style={{ color: 'var(--blue)' }}>Earn From</span><br />What You Own.
+              </h1>
+
+              <p style={{ fontSize: '0.9rem', color: 'var(--fg-muted)', lineHeight: 1.7, maxWidth: '440px', margin: '0 0 32px' }}>
+                India's peer-to-peer rental marketplace — built for college campuses and urban communities. KYC verified. Escrow protected. Real-time.
+              </p>
+
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <Link to="/listings" className="btn-primary" style={{ fontSize: '0.78rem', padding: '14px 28px' }}>
+                  Browse Listings →
+                </Link>
+                <Link to="/listings/new" className="btn-secondary" style={{ fontSize: '0.78rem', padding: '14px 28px' }}>
+                  List an Item
+                </Link>
+              </div>
+
+              {/* Stats row */}
+              <div style={{ display: 'flex', gap: '0', marginTop: '40px', borderTop: '1px solid var(--border-light)', paddingTop: '24px' }}>
+                {STATS.map((s, i) => (
+                  <div key={s.label} style={{ flex: 1, paddingRight: '20px', marginRight: '20px', borderRight: i < STATS.length - 1 ? '1px solid var(--border-light)' : 'none' }}>
+                    <p style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.03em', color: 'var(--fg)', margin: 0 }}>{s.val}</p>
+                    <p style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-faint)', margin: '2px 0 0' }}>{s.label}</p>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* CTA Banner */}
-        <section id="download" className="relative mt-20 overflow-hidden rounded-3xl p-px">
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-sky-500 to-emerald-500 opacity-60" />
-          <div className="relative rounded-[calc(1.5rem-1px)] bg-slate-950 p-8 md:p-12">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_50%,rgba(124,92,255,0.15),transparent_60%)]" />
-            <div className="relative flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-              <div>
-                <div className="text-3xl font-black text-white md:text-4xl">
-                  Ready to start?
-                </div>
-                <p className="mt-2 text-slate-400">
-                  Download the app or list your first item in under 2 minutes.
-                </p>
-                <p className="mt-1 font-mono text-xs text-slate-600">
-                  npx expo start · pnpm --filter api dev
-                </p>
-              </div>
-              <div className="flex flex-shrink-0 flex-wrap gap-3">
-                <Button variant="secondary" href="#pricing">View pricing</Button>
-              <Link to="/listings/new">
-                <Button size="lg">
-                  Start listing ↗
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    
-    {/* FAQ Section */}
-      <section id="faq" className="relative mt-20 max-w-6xl mx-auto px-4 py-10">
-        <div className="gradient-border overflow-hidden rounded-3xl bg-slate-900/40 p-8 md:p-12">
-          <div className="inline-block rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
-            FAQ
-          </div>
-          <h2 className="mt-4 text-3xl font-black tracking-tight text-white md:text-4xl">
-            Frequently Asked Questions
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-slate-400">
-            Have questions about renting or listing items? Find quick answers here.
-          </p>
-          
-          <div className="mt-10 space-y-4">
-            {/* Open Source Contributors: Add FAQ accordion items here */}
-            <div className="rounded-xl border border-white/[0.08] bg-slate-900/20 p-6 text-slate-500 text-sm text-center border-dashed">
-              Contributor placeholder: Interactive FAQ accordion layout will go here.
-            </div>
-          </div>
-        </div>
-      </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-white/[0.04]">
-        <div className="mx-auto w-full max-w-6xl px-6 py-10">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-violet-600 text-xs font-black text-white">RM</div>
-              <div>
-                <div className="text-sm font-bold text-white">Rent Mate</div>
-                <div className="text-xs text-slate-600">© {new Date().getFullYear()} · MIT License</div>
-              </div>
-            </div>
-            <div className="flex gap-6 text-xs text-slate-600">
-              {['Privacy', 'Terms', 'Contributing', 'GitHub'].map((l) => (
-                <a key={l} href="#" className="transition-colors hover:text-slate-300">{l}</a>
+            {/* Right — visual grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
+              {[
+                { emoji: '📷', label: 'DSLR Camera', price: '₹500', tag: 'POPULAR', bg: '#f7f7f4' },
+                { emoji: '🎮', label: 'Gaming Console', price: '₹350', tag: 'TRENDING', bg: '#f0f5ff' },
+                { emoji: '🛵', label: 'Scooter', price: '₹800', tag: 'NEW', bg: '#f5fff0' },
+                { emoji: '🎸', label: 'Acoustic Guitar', price: '₹250', tag: 'KYC ✓', bg: '#fff8f0' },
+              ].map((item, i) => (
+                <Link
+                  to="/listings"
+                  key={item.label}
+                  style={{
+                    background: item.bg,
+                    borderLeft: i % 2 !== 0 ? '1px solid var(--border-light)' : 'none',
+                    borderTop: i >= 2 ? '1px solid var(--border-light)' : 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '32px 20px',
+                    textDecoration: 'none',
+                    transition: 'background 0.15s',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#eeede8'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = item.bg; }}
+                >
+                  <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+                    <span style={{ background: 'var(--fg)', color: '#fff', padding: '2px 8px', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{item.tag}</span>
+                  </div>
+                  <div style={{ fontSize: '3.5rem', lineHeight: 1, marginBottom: '16px' }}>{item.emoji}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-end' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--fg)' }}>{item.label}</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--fg)' }}>{item.price}<span style={{ fontSize: '0.6rem', color: 'var(--fg-muted)', fontWeight: 500 }}>/day</span></span>
+                  </div>
+                </Link>
               ))}
             </div>
-            <div className="font-mono text-xs text-slate-700">API: {API_BASE}</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── MARQUEE ──────────────────────────────────────────────────────── */}
+      <MarqueeStrip />
+
+      {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
+      <section id="how" style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border-light)' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
+          {/* Section header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '40px 0 0', borderBottom: '1px solid var(--border-light)', marginBottom: '0' }}>
+            <div>
+              <p style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-faint)', margin: '0 0 6px' }}>How it works</p>
+              <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 900, letterSpacing: '-0.03em', textTransform: 'uppercase', color: 'var(--fg)', margin: 0 }}>
+                Three Steps to Your Next Rental
+              </h2>
+            </div>
+            <Link to="/listings" className="btn-secondary" style={{ fontSize: '0.72rem', flexShrink: 0 }}>Browse All →</Link>
+          </div>
+
+          {/* 3-col step cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            {HOW_IT_WORKS.map((s, i) => (
+              <div
+                key={s.step}
+                style={{
+                  padding: '48px 36px',
+                  borderLeft: i > 0 ? '1px solid var(--border-light)' : 'none',
+                  position: 'relative',
+                }}
+              >
+                <div style={{ position: 'absolute', top: '24px', right: '24px', fontSize: '3rem', fontWeight: 900, color: 'var(--border-light)', lineHeight: 1 }}>{s.step}</div>
+                <div style={{ fontSize: '2.8rem', marginBottom: '20px' }}>{s.icon}</div>
+                <p style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-faint)', margin: '0 0 8px' }}>Step {s.step}</p>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 900, letterSpacing: '-0.02em', textTransform: 'uppercase', color: 'var(--fg)', margin: '0 0 10px' }}>{s.title}</h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--fg-muted)', lineHeight: 1.7, margin: 0 }}>{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TRUST & SAFETY ───────────────────────────────────────────────── */}
+      <section id="trust" style={{ borderBottom: '1px solid var(--border-light)' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+          {/* Left text */}
+          <div style={{ padding: '60px 48px 60px 0', borderRight: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <p style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-faint)', margin: '0 0 12px' }}>Trust & Safety</p>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.03em', textTransform: 'uppercase', color: 'var(--fg)', margin: '0 0 16px', lineHeight: 1.1 }}>
+              Built Safe,<br />From the<br />Ground Up.
+            </h2>
+            <p style={{ fontSize: '0.88rem', color: 'var(--fg-muted)', lineHeight: 1.7, margin: '0 0 28px', maxWidth: '380px' }}>
+              Every transaction is wrapped in identity checks, escrow payments, and dispute resolution — so you rent and lend with zero anxiety.
+            </p>
+            <Link to="/auth" className="btn-primary" style={{ width: 'fit-content', fontSize: '0.75rem' }}>
+              Get Started →
+            </Link>
+          </div>
+
+          {/* Right grid of trust items */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            {TRUST_ITEMS.map((t, i) => (
+              <div
+                key={t.label}
+                style={{
+                  padding: '40px 32px',
+                  borderLeft: i % 2 !== 0 ? '1px solid var(--border-light)' : 'none',
+                  borderTop: i >= 2 ? '1px solid var(--border-light)' : 'none',
+                  transition: 'background 0.15s',
+                  cursor: 'default',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = '#f7f7f4'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: '16px' }}>{t.icon}</div>
+                <p style={{ fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--fg)', margin: '0 0 6px' }}>{t.label}</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', margin: 0 }}>{t.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA BANNER ───────────────────────────────────────────────────── */}
+      <section id="cta" style={{ background: 'var(--fg)', borderBottom: '1px solid var(--fg)' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap', minHeight: '140px' }}>
+          <div>
+            <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 900, letterSpacing: '-0.03em', textTransform: 'uppercase', color: '#fff', margin: 0 }}>
+              Ready to Start?
+            </h2>
+            <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', margin: '6px 0 0' }}>
+              List your first item in under 2 minutes. No listing fees.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <Link to="/listings" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', padding: '13px 24px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', transition: 'border-color 0.15s', cursor: 'pointer' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = '#fff'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,0.3)'; }}
+            >Browse Listings</Link>
+            <Link to="/listings/new" className="btn-primary" style={{ fontSize: '0.75rem' }}>
+              Start Listing ↗
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
+      <section id="faq" style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border-light)' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0' }}>
+          {/* Left label */}
+          <div style={{ padding: '60px 48px 60px 0', borderRight: '1px solid var(--border-light)', position: 'sticky', top: '100px', height: 'fit-content' }}>
+            <p style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-faint)', margin: '0 0 12px' }}>FAQ</p>
+            <h2 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em', textTransform: 'uppercase', color: 'var(--fg)', margin: '0 0 16px', lineHeight: 1.1 }}>
+              Frequently<br />Asked<br />Questions
+            </h2>
+            <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', margin: 0 }}>
+              Have more questions? Reach out on GitHub Issues.
+            </p>
+          </div>
+          {/* Right accordions */}
+          <div style={{ padding: '60px 0 60px 48px' }}>
+            {FAQS.map(faq => <FAQ key={faq.q} q={faq.q} a={faq.a} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
+      <footer style={{ background: 'var(--fg)', borderTop: '1px solid #222' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 24px', display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.04em', color: '#fff', textTransform: 'uppercase' }}>
+              Rent<span style={{ color: 'var(--accent)' }}>Mate</span>
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem' }}>© {new Date().getFullYear()} · MIT License</span>
+          </div>
+          <div style={{ display: 'flex', gap: '24px' }}>
+            {['Privacy', 'Terms', 'Contributing', 'GitHub'].map(l => (
+              <a key={l} href="#" style={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', transition: 'color 0.15s', textDecoration: 'none' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#fff'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.4)'; }}
+              >{l}</a>
+            ))}
+          </div>
+          <div style={{ fontSize: '0.68rem', fontFamily: 'monospace', color: 'rgba(255,255,255,0.25)' }}>
+            Hyperlocal · P2P · KYC Verified
           </div>
         </div>
       </footer>
@@ -471,6 +324,3 @@ export default function App() {
     </Routes>
   )
 }
-
-
-
